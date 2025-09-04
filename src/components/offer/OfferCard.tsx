@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, ChevronDown, ChevronUp, Copy, Trash2, Settings, Save } from "lucide-react";
+import React from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Offer } from "./types";
@@ -45,7 +46,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
     { id: 'pricing', label: 'Pricing' }
   ];
 
-  function saveAllOffers(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
+  function saveAllOffers(event: React.MouseEvent<HTMLButtonElement>): void {
     throw new Error("Function not implemented.");
   }
 
