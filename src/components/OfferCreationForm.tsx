@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,8 +38,23 @@ const createEmptyOffer = (): Offer => ({
   update_status: ""
 });
 
-export function OfferCreationForm() {
-  const [offers, setOffers] = useState<Offer[]>([createEmptyOffer()]);
+export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatusFilter }: { initialOffers?: Offer[], mode?: 'create' | 'export', statusFilter?: string | null, setStatusFilter?: (value: string | null) => void }) {
+  // Session storage persistence for create page
+  const isCreate = mode === 'create';
+  const loadOffers = () => {
+    if (isCreate) {
+      const data = sessionStorage.getItem('offers');
+      if (data) return JSON.parse(data);
+    }
+    return initialOffers && initialOffers.length > 0 ? initialOffers : [createEmptyOffer()];
+  };
+  const [offers, setOffers] = useState<Offer[]>(loadOffers());
+
+  useEffect(() => {
+    if (isCreate) {
+      sessionStorage.setItem('offers', JSON.stringify(offers));
+    }
+  }, [offers, isCreate]);
   const [showSummary, setShowSummary] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'PROMO' | 'BASE' | 'VOUCHER' | 'PRODUCT'>('all');
@@ -50,8 +65,9 @@ export function OfferCreationForm() {
     const matchesSearch = offer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          offer.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          offer.productId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || offer.type === filterType;
-    return matchesSearch && matchesFilter;
+    const matchesType = filterType === 'all' || offer.type === filterType;
+    const matchesStatus = mode === 'export' && statusFilter ? offer.status === statusFilter : true;
+    return matchesSearch && matchesType && matchesStatus;
   });
 
   const addOffer = () => {
@@ -174,23 +190,30 @@ export function OfferCreationForm() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Bulk Offer Management</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                {mode === 'export' ? 'Bulk Offer Export' : 'Bulk Offer Create'}
+              </h1>
               <p className="text-muted-foreground mt-1">
-                Create and manage multiple promotional offers efficiently
+                {mode === 'export'
+                  ? 'Export multiple offers and manage your bulk export data.'
+                  : 'Create and manage multiple promotional offers efficiently'}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/*<Button variant="outline" size="sm" onClick={exportOffers}>
-                Export
-              </Button>*/}
-              <Button variant="outline" size="sm" onClick={saveAllOffers}>
-                <Save className="mr-2 h-4 w-4" />
-                Save All
-              </Button>
-              <Button onClick={addOffer} className="bg-primary hover:bg-primary-hover">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Offer
-              </Button>
+              {mode === 'create' ? (
+                <Button onClick={addOffer} className="bg-primary hover:bg-primary-hover">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Offer
+                </Button>
+              ) : (
+                <Button onClick={exportOffers} className="bg-primary hover:bg-primary-hover">
+                  {selectedOffers.length === 0
+                    ? 'Export All'
+                    : selectedOffers.length === offers.length
+                      ? 'Export All'
+                      : 'Export Selected'}
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -211,6 +234,7 @@ export function OfferCreationForm() {
                 />
               </div>
               
+
               <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
                 <SelectTrigger className="w-32">
                   <Filter className="mr-2 h-4 w-4" />
@@ -225,6 +249,23 @@ export function OfferCreationForm() {
                 </SelectContent>
               </Select>
 
+              {mode === 'export' && setStatusFilter && (
+                <Select value={statusFilter ?? undefined} onValueChange={value => setStatusFilter(value === 'all' ? null : value)}>
+                  <SelectTrigger className="w-32">
+                    <Badge className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Statuses</SelectItem>
+                    <SelectItem value="Draft">Draft</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Live">Live</SelectItem>
+                    <SelectItem value="Reviewed">Reviewed</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+
               <div className="flex items-center gap-2">
                 <Checkbox
                   checked={offers.length > 0 && selectedOffers.length === offers.length}
@@ -236,63 +277,7 @@ export function OfferCreationForm() {
               </div>
             </div>
 
-            {selectedOffers.length > 0 && (
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="mr-2">
-                  {selectedOffers.length} selected
-                </Badge>
-                <Button variant="outline" size="sm" onClick={bulkCopy}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Clone Selected
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={bulkDelete}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Selected
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => {
-                      setOffers(prev => prev.map(offer => 
-                        offer.isSelected ? { ...offer, type: 'PROMO' } : offer
-                      ));
-                    }}>
-                      Set as PROMO
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      setOffers(prev => prev.map(offer => 
-                        offer.isSelected ? { ...offer, type: 'BASE' } : offer
-                      ));
-                    }}>
-                      Set as BASE
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      setOffers(prev => prev.map(offer => 
-                        offer.isSelected ? { ...offer, type: 'VOUCHER' } : offer
-                      ));
-                    }}>
-                      Set as VOUCHER
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      setOffers(prev => prev.map(offer => 
-                        offer.isSelected ? { ...offer, type: 'PRODUCT' } : offer
-                      ));
-                    }}>
-                      Set as PRODUCT
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+            {/* Removed Clone Selected and Delete Selected buttons for export page */}
           </div>
         </div>
       </div>

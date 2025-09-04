@@ -63,9 +63,25 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
               onCheckedChange={(checked) => onSelect(offer.id, !!checked)}
             />
             <div className="flex items-center gap-2">
-              <Badge variant={offer.type === 'PROMO' ? 'default' : 'secondary'}>
+              <Badge
+                className="bg-red-500 text-white"
+              >
                 {offer.type}
               </Badge>
+              {offer.status && (
+                <Badge
+                  className={
+                    offer.status === 'Active' ? 'bg-green-500 text-white' :
+                    offer.status === 'Inactive' ? 'bg-gray-400 text-white' :
+                    offer.status === 'Draft' ? 'bg-yellow-400 text-black' :
+                    offer.status === 'Live' ? 'bg-blue-500 text-white' :
+                    offer.status === 'Reviewed' ? 'bg-purple-500 text-white' :
+                    'bg-muted text-foreground'
+                  }
+                >
+                  {offer.status}
+                </Badge>
+              )}
               <CardTitle className="text-lg">{offer.name || 'Untitled Offer'}</CardTitle>
             </div>
           </div>

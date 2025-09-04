@@ -46,6 +46,7 @@ export interface PriceConfiguration {
 
 export interface Offer {
   update_status: string;
+  status?: 'Draft' | 'Inactive' | 'Active' | 'Live' | 'Reviewed';
   id: string;
   name: string;
   description: string;

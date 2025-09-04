@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  base: "/Bulkmanagement/", // This sets the base path for your app
+  base: "/bulk/", // Unified base path for all bulk routes
   server: {
     host: "::",
     port: 8080, // Port must be a number, not a path
