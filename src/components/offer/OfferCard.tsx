@@ -64,11 +64,50 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
               onCheckedChange={(checked) => onSelect(offer.id, !!checked)}
             />
             <div className="flex items-center gap-2">
-              <Badge
-                className="bg-red-500 text-white"
-              >
-                {offer.type}
-              </Badge>
+              {typeof window !== 'undefined' && window.location.pathname.includes('/bulk/create') ? (
+                <Select value={offer.type} onValueChange={type => {
+                  // Adjust fields based on type
+                  let updates: Partial<Offer> = { type };
+                  if (type === 'PROMO') {
+                    updates.priceConfiguration = {
+                      ...offer.priceConfiguration,
+                      promoType: 'Discount',
+                      priceModifier: { ...offer.priceConfiguration.priceModifier, type: 'percentage' }
+                    };
+                  } else if (type === 'BASE') {
+                    updates.priceConfiguration = {
+                      ...offer.priceConfiguration,
+                      promoType: '',
+                      priceModifier: { ...offer.priceConfiguration.priceModifier, type: 'fixed' }
+                    };
+                  } else if (type === 'VOUCHER') {
+                    updates.priceConfiguration = {
+                      ...offer.priceConfiguration,
+                      promoType: 'Voucher',
+                      priceModifier: { ...offer.priceConfiguration.priceModifier, type: 'fixed' }
+                    };
+                  } else if (type === 'PRODUCT') {
+                    updates.priceConfiguration = {
+                      ...offer.priceConfiguration,
+                      promoType: '',
+                      priceModifier: { ...offer.priceConfiguration.priceModifier, type: 'fixed' }
+                    };
+                  }
+                  updateOffer(updates);
+                }}>
+                  <SelectTrigger className="w-20 bg-red-500 text-white rounded-full px-2 py-0.5 border-none shadow-none focus:ring-0 text-xs min-h-0 h-6">
+                    <SelectValue className="text-white" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PROMO">PROMO</SelectItem>
+                    <SelectItem value="BASE">BASE</SelectItem>
+                    <SelectItem value="VOUCHER">VOUCHER</SelectItem>
+                    <SelectItem value="PRODUCT">PRODUCT</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge className="bg-red-500 text-white">{offer.type}</Badge>
+              )}
               {offer.status && (
                 <Badge
                   className={
