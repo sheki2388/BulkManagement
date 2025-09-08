@@ -30,6 +30,6 @@ Replace 'localhost' with your network IP if accessing from another device.
 After starting the app, you can access:
 
 - Create page: [http://localhost:8080/bulk/create](http://localhost:8080/bulk/create)
-- Export page: [http://localhost:8080/bulk/upload](http://localhost:8080/bulk/upload)
+- Export page: [http://localhost:8080/bulk/upload](http://localhost:8080/bulk/export)
 
 Replace 'localhost' with your network IP if accessing from another device.
