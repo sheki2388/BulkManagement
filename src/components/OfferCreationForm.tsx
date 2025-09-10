@@ -38,7 +38,7 @@ const createEmptyOffer = (): Offer => ({
   update_status: ""
 });
 
-export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatusFilter }: { initialOffers?: Offer[], mode?: 'create' | 'export', statusFilter?: string | null, setStatusFilter?: (value: string | null) => void }) {
+export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatusFilter }: { initialOffers?: Offer[], mode?: 'create' | 'export' | 'import', statusFilter?: string | null, setStatusFilter?: (value: string | null) => void }) {
   // Session storage persistence for create page
   const isCreate = mode === 'create';
   const loadOffers = () => {
@@ -191,28 +191,84 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-foreground">
-                {mode === 'export' ? 'Bulk Offer Export' : 'Bulk Offer Create'}
+                {mode === 'import'
+                  ? 'Bulk Offer Import'
+                  : mode === 'export'
+                    ? 'Bulk Offer Export'
+                    : 'Bulk Offer Create'}
               </h1>
               <p className="text-muted-foreground mt-1">
-                {mode === 'export'
-                  ? 'Export multiple offers and manage your bulk export data.'
-                  : 'Create and manage multiple promotional offers efficiently'}
+                {mode === 'import'
+                  ? 'Import offers from backend and review imported data.'
+                  : mode === 'export'
+                    ? 'Export multiple offers and manage your bulk export data.'
+                    : 'Create and manage multiple promotional offers efficiently'}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {mode === 'create' ? (
+              {mode === 'create' && (
                 <Button onClick={addOffer} className="bg-primary hover:bg-primary-hover">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Offer
                 </Button>
-              ) : (
-                <Button onClick={exportOffers} className="bg-primary hover:bg-primary-hover">
-                  {selectedOffers.length === 0
-                    ? 'Export All'
-                    : selectedOffers.length === offers.length
-                      ? 'Export All'
-                      : 'Export Selected'}
-                </Button>
+              )}
+              {(mode === 'export' || mode === 'import') && (
+                <>
+                  {mode === 'import' ? (
+                    <>
+                      <input
+                        type="file"
+                        accept="application/json"
+                        style={{ display: 'none' }}
+                        id="import-offer-file"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            try {
+                              const json = JSON.parse(event.target?.result as string);
+                              if (Array.isArray(json)) {
+                                setOffers(json);
+                                toast({
+                                  title: "Import Successful",
+                                  description: `${json.length} offers loaded from file.`
+                                });
+                              } else {
+                                toast({
+                                  title: "Import Failed",
+                                  description: "File does not contain a valid array of offers.",
+                                  variant: "destructive"
+                                });
+                              }
+                            } catch {
+                              toast({
+                                title: "Import Failed",
+                                description: "Could not parse JSON file.",
+                                variant: "destructive"
+                              });
+                            }
+                          };
+                          reader.readAsText(file);
+                        }}
+                      />
+                      <Button
+                        className="bg-primary hover:bg-primary-hover"
+                        onClick={() => document.getElementById('import-offer-file')?.click()}
+                      >
+                        Import Offer
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={exportOffers} className="bg-primary hover:bg-primary-hover">
+                      {selectedOffers.length === 0
+                        ? 'Export All'
+                        : selectedOffers.length === offers.length
+                          ? 'Export All'
+                          : 'Export Selected'}
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </div>

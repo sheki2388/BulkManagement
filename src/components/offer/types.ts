@@ -6,27 +6,37 @@ export interface DeviceType {
 
 export interface FlowType {
   OTT: boolean;
-  TMF: boolean;
   STANDALONE: boolean;
+  API: boolean;
   MVA: boolean;
 }
 
 export interface Rule {
   id: string;
-  type: 'device_range' | 'device_type' | 'flow' | 'price_range' | 'loyalty_points' | 'custom';
-  label: string;
+  type:
+    | 'device_type'
+    | 'manufacture_name'
+    | 'store_id'
+    | 'flow'
+    | 'price_range'
+    | 'loyalty_points';
   config: {
-    fromDate?: Date;
-    toDate?: Date;
+    // Device Type
     deviceTypes?: DeviceType;
+    // Manufacture Name
+    manufactureNames?: string[];
+    // Store ID
+    storeIds?: string;
+    // Flow
     flowTypes?: FlowType;
+    // Price Range
     priceMin?: number;
     priceMax?: number;
-    customField?: string;
-    customValue?: string;
-    customOperator?: 'equals' | 'contains' | 'greater_than' | 'less_than';
+    // Loyalty Points
+    minPoints?: number;
+    maxPoints?: number;
+  // ...removed custom rule fields...
   };
-  isRequired: boolean;
 }
 
 export interface PriceConfiguration {

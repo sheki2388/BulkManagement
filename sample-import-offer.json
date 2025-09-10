@@ -1,0 +1,402 @@
+[
+  {
+    "id": "offer-1",
+    "name": "Promo Discount",
+    "description": "10% off on all products.",
+    "type": "PROMO",
+    "productId": "PRD-1001",
+    "eipProductId": "EIP-2001",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "100",
+      "endDateKnown": true,
+      "duration": "month",
+      "promoType": "Discount",
+      "description": "10% off",
+      "priceModifier": { "type": "percentage", "value": 10, "start": 0, "end": 0, "amount": 0 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Active"
+  },
+  {
+    "id": "offer-2",
+    "name": "Base Subscription",
+    "description": "Monthly base plan.",
+    "type": "BASE",
+    "productId": "PRD-1002",
+    "eipProductId": "EIP-2002",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "120",
+      "endDateKnown": false,
+      "duration": "month",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 20 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Draft"
+  },
+  {
+    "id": "offer-3",
+    "name": "Voucher Reward",
+    "description": "Voucher for loyal customers.",
+    "type": "VOUCHER",
+    "productId": "PRD-1003",
+    "eipProductId": "EIP-2003",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "80",
+      "endDateKnown": true,
+      "duration": "week",
+      "promoType": "Voucher",
+      "description": "Get 1 free",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 10 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Inactive"
+  },
+  {
+    "id": "offer-4",
+    "name": "Product Launch",
+    "description": "Special price for new product.",
+    "type": "PRODUCT",
+    "productId": "PRD-1004",
+    "eipProductId": "EIP-2004",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "150",
+      "endDateKnown": false,
+      "duration": "day",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 30 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Live"
+  },
+  {
+    "id": "offer-5",
+    "name": "Seasonal Promo",
+    "description": "Winter sale offer.",
+    "type": "PROMO",
+    "productId": "PRD-1005",
+    "eipProductId": "EIP-2005",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "110",
+      "endDateKnown": true,
+      "duration": "month",
+      "promoType": "Discount",
+      "description": "15% off",
+      "priceModifier": { "type": "percentage", "value": 15, "start": 0, "end": 0, "amount": 0 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Reviewed"
+  },
+  {
+    "id": "offer-6",
+    "name": "Annual Base",
+    "description": "Annual subscription plan.",
+    "type": "BASE",
+    "productId": "PRD-1006",
+    "eipProductId": "EIP-2006",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "130",
+      "endDateKnown": false,
+      "duration": "month",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 25 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Active"
+  },
+  {
+    "id": "offer-7",
+    "name": "Gift Voucher",
+    "description": "Gift voucher for referrals.",
+    "type": "VOUCHER",
+    "productId": "PRD-1007",
+    "eipProductId": "EIP-2007",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "90",
+      "endDateKnown": true,
+      "duration": "week",
+      "promoType": "Voucher",
+      "description": "Refer & earn",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 15 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Draft"
+  },
+  {
+    "id": "offer-8",
+    "name": "New Product",
+    "description": "Introductory price for new product.",
+    "type": "PRODUCT",
+    "productId": "PRD-1008",
+    "eipProductId": "EIP-2008",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "160",
+      "endDateKnown": false,
+      "duration": "day",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 35 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Inactive"
+  },
+  {
+    "id": "offer-9",
+    "name": "Flash Sale",
+    "description": "Limited time flash sale.",
+    "type": "PROMO",
+    "productId": "PRD-1009",
+    "eipProductId": "EIP-2009",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "115",
+      "endDateKnown": true,
+      "duration": "month",
+      "promoType": "Discount",
+      "description": "20% off",
+      "priceModifier": { "type": "percentage", "value": 20, "start": 0, "end": 0, "amount": 0 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Live"
+  },
+  {
+    "id": "offer-10",
+    "name": "Monthly Base",
+    "description": "Monthly recurring plan.",
+    "type": "BASE",
+    "productId": "PRD-1010",
+    "eipProductId": "EIP-2010",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "140",
+      "endDateKnown": false,
+      "duration": "month",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 30 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Reviewed"
+  },
+  {
+    "id": "offer-11",
+    "name": "Referral Voucher",
+    "description": "Voucher for referrals.",
+    "type": "VOUCHER",
+    "productId": "PRD-1011",
+    "eipProductId": "EIP-2011",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "95",
+      "endDateKnown": true,
+      "duration": "week",
+      "promoType": "Voucher",
+      "description": "Refer & save",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 20 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Active"
+  },
+  {
+    "id": "offer-12",
+    "name": "Limited Edition",
+    "description": "Special price for limited edition.",
+    "type": "PRODUCT",
+    "productId": "PRD-1012",
+    "eipProductId": "EIP-2012",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "170",
+      "endDateKnown": false,
+      "duration": "day",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 40 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Draft"
+  },
+  {
+    "id": "offer-13",
+    "name": "Spring Promo",
+    "description": "Spring sale offer.",
+    "type": "PROMO",
+    "productId": "PRD-1013",
+    "eipProductId": "EIP-2013",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "120",
+      "endDateKnown": true,
+      "duration": "month",
+      "promoType": "Discount",
+      "description": "12% off",
+      "priceModifier": { "type": "percentage", "value": 12, "start": 0, "end": 0, "amount": 0 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Inactive"
+  },
+  {
+    "id": "offer-14",
+    "name": "Quarterly Base",
+    "description": "Quarterly subscription plan.",
+    "type": "BASE",
+    "productId": "PRD-1014",
+    "eipProductId": "EIP-2014",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "150",
+      "endDateKnown": false,
+      "duration": "month",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 35 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Live"
+  },
+  {
+    "id": "offer-15",
+    "name": "Customer Voucher",
+    "description": "Voucher for new customers.",
+    "type": "VOUCHER",
+    "productId": "PRD-1015",
+    "eipProductId": "EIP-2015",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "100",
+      "endDateKnown": true,
+      "duration": "week",
+      "promoType": "Voucher",
+      "description": "Welcome gift",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 25 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Reviewed"
+  },
+  {
+    "id": "offer-16",
+    "name": "Exclusive Product",
+    "description": "Exclusive product launch.",
+    "type": "PRODUCT",
+    "productId": "PRD-1016",
+    "eipProductId": "EIP-2016",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "180",
+      "endDateKnown": false,
+      "duration": "day",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 45 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Active"
+  },
+  {
+    "id": "offer-17",
+    "name": "Summer Promo",
+    "description": "Summer sale offer.",
+    "type": "PROMO",
+    "productId": "PRD-1017",
+    "eipProductId": "EIP-2017",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "125",
+      "endDateKnown": true,
+      "duration": "month",
+      "promoType": "Discount",
+      "description": "18% off",
+      "priceModifier": { "type": "percentage", "value": 18, "start": 0, "end": 0, "amount": 0 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Draft"
+  },
+  {
+    "id": "offer-18",
+    "name": "Weekly Base",
+    "description": "Weekly recurring plan.",
+    "type": "BASE",
+    "productId": "PRD-1018",
+    "eipProductId": "EIP-2018",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "160",
+      "endDateKnown": false,
+      "duration": "week",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 40 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Inactive"
+  },
+  {
+    "id": "offer-19",
+    "name": "Loyalty Voucher",
+    "description": "Voucher for loyal customers.",
+    "type": "VOUCHER",
+    "productId": "PRD-1019",
+    "eipProductId": "EIP-2019",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "105",
+      "endDateKnown": true,
+      "duration": "week",
+      "promoType": "Voucher",
+      "description": "Loyalty reward",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 30 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Live"
+  },
+  {
+    "id": "offer-20",
+    "name": "Premium Product",
+    "description": "Premium product launch.",
+    "type": "PRODUCT",
+    "productId": "PRD-1020",
+    "eipProductId": "EIP-2020",
+    "rules": [],
+    "priceConfiguration": {
+      "erPricepoint": "190",
+      "endDateKnown": false,
+      "duration": "day",
+      "promoType": "",
+      "description": "",
+      "priceModifier": { "type": "fixed", "value": 0, "start": 0, "end": 0, "amount": 50 }
+    },
+    "isSelected": false,
+    "update_status": "ready",
+    "status": "Reviewed"
+  }
+]

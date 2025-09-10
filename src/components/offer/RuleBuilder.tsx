@@ -18,12 +18,12 @@ interface RuleBuilderProps {
 }
 
 const ruleTypes = [
-  { value: 'device_range', label: 'Device Range' },
   { value: 'device_type', label: 'Device Type' },
   { value: 'flow', label: 'Flow Type' },
   { value: 'price_range', label: 'Price Range' },
   { value: 'loyalty_points', label: 'Loyalty Points' },
-  { value: 'custom', label: 'Custom Rule' }
+  { value: 'manufacture_name', label: 'Manufacture Name' },
+  { value: 'store_id', label: 'Store ID' }
 ];
 
 export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
@@ -32,10 +32,8 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
   const addRule = () => {
     const newRule: Rule = {
       id: `rule-${Date.now()}`,
-      type: 'device_range',
-      label: 'New Rule',
-      config: {},
-      isRequired: false
+      type: 'device_type',
+      config: { deviceTypes: { MO: false, SW: false, TA: false } }
     };
     onRulesChange([...rules, newRule]);
     setExpandedRules(prev => new Set([...prev, newRule.id]));
@@ -50,10 +48,38 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
     });
   };
 
+  // Get default config for a rule type
+  const getDefaultConfig = (type: Rule['type']) => {
+    switch (type) {
+      case 'device_type':
+        return { deviceTypes: { MO: false, SW: false, TA: false } };
+      case 'manufacture_name':
+        return { manufactureNames: [] };
+      case 'store_id':
+        return { storeIds: '' };
+      case 'flow':
+        return { flowTypes: { OTT: false, STANDALONE: false, API: false, MVA: false } };
+      case 'price_range':
+        return { priceMin: 0, priceMax: 1000 };
+  // ...removed custom rule config...
+      case 'loyalty_points':
+        return {};
+      default:
+        return {};
+    }
+  };
+
   const updateRule = (ruleId: string, updates: Partial<Rule>) => {
-    onRulesChange(rules.map(rule => 
-      rule.id === ruleId ? { ...rule, ...updates } : rule
-    ));
+    onRulesChange(rules.map(rule => {
+      if (rule.id === ruleId) {
+        // If type is changing, reset config
+        if (updates.type && updates.type !== rule.type) {
+          return { ...rule, ...updates, config: getDefaultConfig(updates.type as Rule['type']) };
+        }
+        return { ...rule, ...updates };
+      }
+      return rule;
+    }));
   };
 
   const toggleRuleExpansion = (ruleId: string) => {
@@ -73,68 +99,37 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
     if (!isExpanded) return null;
 
     switch (rule.type) {
-      case 'device_range':
+      case 'loyalty_points':
         return (
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div className="space-y-2">
-              <Label>From Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !rule.config.fromDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {rule.config.fromDate ? format(rule.config.fromDate, "PPP") : "Pick date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={rule.config.fromDate}
-                    onSelect={(date) => updateRule(rule.id, {
-                      config: { ...rule.config, fromDate: date }
-                    })}
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
+              <Label>Min Loyalty Points</Label>
+              <Input
+                type="number"
+                value={rule.config.minPoints || ''}
+                onChange={(e) => updateRule(rule.id, {
+                  config: { ...rule.config, minPoints: parseFloat(e.target.value) || 0 }
+                })}
+                placeholder="0"
+              />
             </div>
             <div className="space-y-2">
-              <Label>To Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !rule.config.toDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {rule.config.toDate ? format(rule.config.toDate, "PPP") : "Pick date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={rule.config.toDate}
-                    onSelect={(date) => updateRule(rule.id, {
-                      config: { ...rule.config, toDate: date }
-                    })}
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
+              <Label>Max Loyalty Points</Label>
+              <Input
+                type="number"
+                value={rule.config.maxPoints || ''}
+                onChange={(e) => updateRule(rule.id, {
+                  config: { ...rule.config, maxPoints: parseFloat(e.target.value) || 0 }
+                })}
+                placeholder="1000"
+              />
             </div>
           </div>
         );
+      // ...existing code...
 
       case 'device_type':
-        const deviceTypes = rule.config.deviceTypes || { MO: false, SW: false, TA: false };
+  const deviceTypes = rule.config.deviceTypes || { MO: false, SW: false, TA: false };
         return (
           <div className="mt-4">
             <Label className="text-sm font-medium">Device Types</Label>
@@ -159,7 +154,7 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
         );
 
       case 'flow':
-        const flowTypes = rule.config.flowTypes || { OTT: false, TMF: false, STANDALONE: false, MVA: false };
+        const flowTypes = rule.config.flowTypes || { OTT: false, STANDALONE: false, API: false, MVA: false };
         return (
           <div className="mt-4">
             <Label className="text-sm font-medium">Flow Types</Label>
@@ -180,6 +175,47 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
                 </div>
               ))}
             </div>
+          </div>
+        );
+      case 'manufacture_name':
+        const allManufacturers = ["Apple", "Samsung", "Xiaomi", "OnePlus", "Google", "Other"];
+        const selectedManufacturers = rule.config.manufactureNames || [];
+        return (
+          <div className="mt-4">
+            <Label className="text-sm font-medium">Device Mobile Manufacturer Name</Label>
+            <div className="flex space-x-6 mt-2">
+              {allManufacturers.map((name) => (
+                <div key={name} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`${rule.id}-${name}`}
+                    checked={selectedManufacturers.includes(name)}
+                    onCheckedChange={(isChecked) => {
+                      let updated = isChecked
+                        ? [...selectedManufacturers, name]
+                        : selectedManufacturers.filter((n) => n !== name);
+                      updateRule(rule.id, {
+                        config: { ...rule.config, manufactureNames: updated }
+                      });
+                    }}
+                  />
+                  <Label htmlFor={`${rule.id}-${name}`} className="text-sm">{name}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'store_id':
+        return (
+          <div className="mt-4">
+            <Label className="text-sm font-medium">Store ID</Label>
+            <textarea
+              className="w-full border rounded p-2 text-sm"
+              value={rule.config.storeIds || ''}
+              onChange={(e) => updateRule(rule.id, { config: { ...rule.config, storeIds: e.target.value } })}
+              placeholder="Enter Store IDs (newline or | separated)"
+              rows={3}
+            />
           </div>
         );
 
@@ -211,52 +247,7 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
           </div>
         );
 
-      case 'custom':
-        return (
-          <div className="space-y-4 mt-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Field</Label>
-                <Input
-                  value={rule.config.customField || ''}
-                  onChange={(e) => updateRule(rule.id, {
-                    config: { ...rule.config, customField: e.target.value }
-                  })}
-                  placeholder="Field name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Operator</Label>
-                <Select
-                  value={rule.config.customOperator || 'equals'}
-                  onValueChange={(value: any) => updateRule(rule.id, {
-                    config: { ...rule.config, customOperator: value }
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="equals">Equals</SelectItem>
-                    <SelectItem value="contains">Contains</SelectItem>
-                    <SelectItem value="greater_than">Greater than</SelectItem>
-                    <SelectItem value="less_than">Less than</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Value</Label>
-                <Input
-                  value={rule.config.customValue || ''}
-                  onChange={(e) => updateRule(rule.id, {
-                    config: { ...rule.config, customValue: e.target.value }
-                  })}
-                  placeholder="Value"
-                />
-              </div>
-            </div>
-          </div>
-        );
+  // ...removed custom rule UI...
 
       default:
         return null;
@@ -303,37 +294,11 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Label</Label>
-                        <Input
-                          value={rule.label}
-                          onChange={(e) => updateRule(rule.id, { label: e.target.value })}
-                          placeholder="Rule label"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Required</Label>
-                        <div className="flex items-center space-x-2 pt-2">
-                          <Checkbox
-                            id={`required-${rule.id}`}
-                            checked={rule.isRequired}
-                            onCheckedChange={(checked) => updateRule(rule.id, { isRequired: !!checked })}
-                          />
-                          <Label htmlFor={`required-${rule.id}`} className="text-sm">
-                            Required rule
-                          </Label>
-                        </div>
-                      </div>
+                      {/* Removed rule label input */}
+                      {/* Removed required rule checkbox and label */}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleRuleExpansion(rule.id)}
-                    >
-                      {expandedRules.has(rule.id) ? 'Collapse' : 'Configure'}
-                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"

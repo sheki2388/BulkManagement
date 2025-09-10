@@ -28,9 +28,61 @@ interface OfferCardProps {
 export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: OfferCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'rules' | 'pricing'>('basic');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'failed' | 'success'>('idle');
 
+  // Helper to get default rules for each type
+  const getDefaultRules = (type: Offer['type']): Offer['rules'] => {
+    if (type === 'PROMO' || type === 'BASE') {
+      return [
+        {
+          id: `rule-price-range-${offer.id}`,
+          type: 'price_range',
+          config: { priceMin: 0, priceMax: 1000 }
+        },
+        {
+          id: `rule-manufacture-name-${offer.id}`,
+          type: 'manufacture_name',
+          config: { manufactureNames: [] }
+        },
+        {
+          id: `rule-store-id-${offer.id}`,
+          type: 'store_id',
+          config: { storeIds: '' }
+        },
+        {
+          id: `rule-flow-${offer.id}`,
+          type: 'flow',
+          config: { flowTypes: { OTT: false, STANDALONE: false, API: false, MVA: false } }
+        }
+      ];
+    } else if (type === 'VOUCHER') {
+      return [
+        {
+          id: `rule-voucher-code-${offer.id}`,
+          type: 'store_id',
+          config: { storeIds: '' }
+        }
+      ];
+    }
+    return [];
+  };
+
+  // Ensure default rules on create page
+  React.useEffect(() => {
+    if (window.location.pathname.includes('/bulk/create')) {
+      if (!offer.rules || offer.rules.length === 0) {
+        updateOffer({ rules: getDefaultRules(offer.type) });
+      }
+    }
+  }, []);
+
+  // Update rules when type changes on create page
   const updateOffer = (updates: Partial<Offer>) => {
-    onOfferChange({ ...offer, ...updates });
+    if (window.location.pathname.includes('/bulk/create') && updates.type && updates.type !== offer.type) {
+      onOfferChange({ ...offer, ...updates, rules: getDefaultRules(updates.type as Offer['type']) });
+    } else {
+      onOfferChange({ ...offer, ...updates });
+    }
   };
 
   const updatePriceConfig = (updates: Partial<Offer['priceConfiguration']>) => {
@@ -46,8 +98,12 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
     { id: 'pricing', label: 'Pricing' }
   ];
 
-  function saveAllOffers(event: React.MouseEvent<HTMLButtonElement>): void {
-    throw new Error("Function not implemented.");
+  // Simulate save logic
+  function handleSave() {
+    // Simulate save success/failure randomly for demo
+    const success = Math.random() > 0.3;
+    setSaveStatus(success ? 'success' : 'failed');
+    // You can replace with real save logic
   }
 
   return (
@@ -67,7 +123,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
               {typeof window !== 'undefined' && window.location.pathname.includes('/bulk/create') ? (
                 <Select value={offer.type} onValueChange={type => {
                   // Adjust fields based on type
-                  let updates: Partial<Offer> = { type };
+                  let updates: Partial<Offer> = { type: type as Offer['type'] };
                   if (type === 'PROMO') {
                     updates.priceConfiguration = {
                       ...offer.priceConfiguration,
@@ -128,26 +184,13 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
           
           <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              onClick={() => onCopy(offer)}
-              className="gap-2"
+              onClick={handleSave}
+              className={saveStatus === 'failed' ? 'border-red-500 text-red-500' : ''}
             >
-              <Copy className="h-4 w-4" />
-              Retry Save
-            </Button>
-            <Button variant="outline" size="sm" onClick={saveAllOffers}>
-                <Save className="mr-2 h-4 w-4" />
-                Save All
-              </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onCopy(offer)}
-              className="gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              Clone
+              <Save className="mr-2 h-4 w-4" />
+              {saveStatus === 'failed' ? 'Retry Save' : 'Save'}
             </Button>
             <Button
               variant="ghost"
