@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 import { OfferCreationForm } from "@/components/OfferCreationForm";
 import { Offer } from "@/components/offer/types";
@@ -16,6 +18,7 @@ const TOTAL_OFFERS = 53;
 import { useState } from "react";
 
 const statusOptions = ["Draft", "Inactive", "Active", "Live", "Reviewed"];
+const countryOptions = ["DE", "ES", "IE", "IT", "PT", "RO", "GB", "CZ", "GR"];
 
 
 const ExportIndex = () => {
@@ -28,7 +31,8 @@ const ExportIndex = () => {
   const paginatedOffers = filteredOffers.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <div>
+    <div className="space-y-6">
+  {/* Country selection removed as requested */}
       <OfferCreationForm
         initialOffers={paginatedOffers}
         mode="export"
@@ -36,11 +40,11 @@ const ExportIndex = () => {
         setStatusFilter={setStatusFilter}
       />
       <div className="flex justify-center items-center gap-2 mt-6">
-        <Button disabled={page === 1} onClick={() => setPage(page - 1)}>
+  <Button disabled={page === 1} onClick={() => setPage(page - 1)}>
           Previous
         </Button>
         <span>Page {page} of {totalPages}</span>
-        <Button disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+  <Button disabled={page === totalPages} onClick={() => setPage(page + 1)}>
           Next
         </Button>
       </div>

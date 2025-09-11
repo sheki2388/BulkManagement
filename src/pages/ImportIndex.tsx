@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { OfferCreationForm } from "@/components/OfferCreationForm";
 import { Offer } from "@/components/offer/types";
 import { Button } from "@/components/ui/button";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 // Mocked fetch function simulating BE call with pagination
 const TOTAL_OFFERS = 53;
@@ -20,6 +21,22 @@ export const generateMockOffers = (start: number, count: number): Offer[] => {
     const type = logicalTypes[idx % logicalTypes.length];
     const status = logicalStatuses[idx % logicalStatuses.length];
     const name = logicalNames[idx % logicalNames.length] + ` #${idx + 1}`;
+    const endDateKnown = idx % 2 === 0;
+    const basePriceConfig: Offer["priceConfiguration"] = {
+      erPricepoint: `${100 + idx * 5}`,
+      endDateKnown,
+      duration: ["year", "month", "week", "day"][idx % 4] as "year" | "month" | "week" | "day",
+      durationValue: (idx % 4) + 1,
+      promoType: type === "PROMO" ? "Discount" : type === "VOUCHER" ? "Voucher" : "",
+      description: type === "PROMO" ? "10% off" : type === "VOUCHER" ? "Get 1 free" : "Standard pricing",
+      priceModifier: {
+        type: idx % 3 === 0 ? "percentage" : idx % 3 === 1 ? "fixed" : "points",
+        value: 10 + idx,
+        start: 0,
+        end: 12,
+        amount: 5 + idx
+      }
+    };
     return {
       id: `offer-${idx + 1}`,
       name,
@@ -33,25 +50,13 @@ export const generateMockOffers = (start: number, count: number): Offer[] => {
           type: "device_type",
           label: "Device Type Rule",
           config: {
-            deviceTypes: { MO: idx % 2 === 0, SW: idx % 3 === 0, TA: idx % 4 === 0 }
+            deviceTypes: { MO: true, SW: true, TA: true }
           },
-          isRequired: idx % 2 === 0
+          isRequired: true
         }
       ],
-      priceConfiguration: {
-        erPricepoint: `${100 + idx * 5}`,
-        endDateKnown: idx % 2 === 0,
-        duration: ["month", "week", "day"][idx % 3] as "month" | "week" | "day",
-        promoType: type === "PROMO" ? "Discount" : type === "VOUCHER" ? "Voucher" : "",
-        description: type === "PROMO" ? "10% off" : type === "VOUCHER" ? "Get 1 free" : "",
-        priceModifier: {
-          type: idx % 2 === 0 ? "percentage" : "fixed",
-          value: idx % 2 === 0 ? 10 : 0,
-          start: 0,
-          end: 0,
-          amount: idx % 2 === 0 ? 0 : 10
-        }
-      },
+      priceConfiguration: basePriceConfig,
+      pricingFrames: endDateKnown ? [basePriceConfig] : undefined,
       isSelected: false,
       update_status: "ready",
       status,
@@ -69,19 +74,16 @@ const fetchOffersFromBE = async (page: number, pageSize: number): Promise<{ offe
   });
 };
 
-
+const countryOptions = ["DE", "ES", "IE", "IT", "PT", "RO", "GB", "CZ", "GR"];
 
 const ImportIndex = () => {
-  const [offers, setOffers] = useState<Offer[]>([]);
-
-  useEffect(() => {
-    // Load all offers at once (no pagination)
-    const allOffers = generateMockOffers(0, TOTAL_OFFERS);
-    setOffers(allOffers);
-  }, []);
+  const [offers, setOffers] = useState<Offer[]>(generateMockOffers(0, TOTAL_OFFERS));
 
   return (
-    <OfferCreationForm initialOffers={offers} mode="import" />
+    <div className="space-y-6">
+  {/* Country selection removed as requested */}
+  <OfferCreationForm initialOffers={offers} mode="import" />
+    </div>
   );
 };
 

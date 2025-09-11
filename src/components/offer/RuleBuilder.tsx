@@ -15,6 +15,7 @@ import { Rule, DeviceType, FlowType } from "./types";
 interface RuleBuilderProps {
   rules: Rule[];
   onRulesChange: (rules: Rule[]) => void;
+  disabled?: boolean;
 }
 
 const ruleTypes = [
@@ -26,10 +27,11 @@ const ruleTypes = [
   { value: 'store_id', label: 'Store ID' }
 ];
 
-export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
+export function RuleBuilder({ rules, onRulesChange, disabled = false }: RuleBuilderProps) {
   const [expandedRules, setExpandedRules] = useState<Set<string>>(new Set());
 
   const addRule = () => {
+    if (disabled) return;
     const newRule: Rule = {
       id: `rule-${Date.now()}`,
       type: 'device_type',
@@ -40,6 +42,7 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
   };
 
   const removeRule = (ruleId: string) => {
+    if (disabled) return;
     onRulesChange(rules.filter(rule => rule.id !== ruleId));
     setExpandedRules(prev => {
       const newSet = new Set(prev);
@@ -140,11 +143,13 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
                     id={`${rule.id}-${type}`}
                     checked={checked}
                     onCheckedChange={(isChecked) => {
+                      if (disabled) return;
                       const newDeviceTypes = { ...deviceTypes, [type]: isChecked };
                       updateRule(rule.id, {
                         config: { ...rule.config, deviceTypes: newDeviceTypes }
                       });
                     }}
+                    disabled={disabled}
                   />
                   <Label htmlFor={`${rule.id}-${type}`} className="text-sm">{type}</Label>
                 </div>
@@ -165,11 +170,13 @@ export function RuleBuilder({ rules, onRulesChange }: RuleBuilderProps) {
                     id={`${rule.id}-${type}`}
                     checked={checked}
                     onCheckedChange={(isChecked) => {
+                      if (disabled) return;
                       const newFlowTypes = { ...flowTypes, [type]: isChecked };
                       updateRule(rule.id, {
                         config: { ...rule.config, flowTypes: newFlowTypes }
                       });
                     }}
+                    disabled={disabled}
                   />
                   <Label htmlFor={`${rule.id}-${type}`} className="text-sm">{type}</Label>
                 </div>

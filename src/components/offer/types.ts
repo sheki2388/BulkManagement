@@ -42,7 +42,8 @@ export interface Rule {
 export interface PriceConfiguration {
   erPricepoint: string;
   endDateKnown: boolean;
-  duration: 'month' | 'week' | 'day';
+  duration: 'year' | 'month' | 'week' | 'day';
+  durationValue?: number;
   promoType: string;
   description: string;
   priceModifier: {
@@ -68,6 +69,7 @@ export interface Offer {
   eipProductId: string;
   rules: Rule[];
   priceConfiguration: PriceConfiguration;
+  pricingFrames?: PriceConfiguration[];
   isSelected: boolean;
 }
 

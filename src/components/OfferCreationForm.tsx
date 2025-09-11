@@ -38,8 +38,8 @@ const createEmptyOffer = (): Offer => ({
   update_status: ""
 });
 
-export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatusFilter }: { initialOffers?: Offer[], mode?: 'create' | 'export' | 'import', statusFilter?: string | null, setStatusFilter?: (value: string | null) => void }) {
-  // Session storage persistence for create page
+export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatusFilter, disabled = false }: { initialOffers?: Offer[], mode?: 'create' | 'export' | 'import', statusFilter?: string | null, setStatusFilter?: (value: string | null) => void, disabled?: boolean }) {
+  // State and handlers
   const isCreate = mode === 'create';
   const loadOffers = () => {
     if (isCreate) {
@@ -49,7 +49,6 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
     return initialOffers && initialOffers.length > 0 ? initialOffers : [createEmptyOffer()];
   };
   const [offers, setOffers] = useState<Offer[]>(loadOffers());
-
   useEffect(() => {
     if (isCreate) {
       sessionStorage.setItem('offers', JSON.stringify(offers));
@@ -59,7 +58,6 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'PROMO' | 'BASE' | 'VOUCHER' | 'PRODUCT'>('all');
   const { toast } = useToast();
-
   const selectedOffers = offers.filter(offer => offer.isSelected);
   const filteredOffers = offers.filter(offer => {
     const matchesSearch = offer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -69,13 +67,42 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
     const matchesStatus = mode === 'export' && statusFilter ? offer.status === statusFilter : true;
     return matchesSearch && matchesType && matchesStatus;
   });
-
   const addOffer = () => {
     const newOffer = createEmptyOffer();
     setOffers(prev => [...prev, newOffer]);
     toast({
       title: "Offer Added",
       description: "A new offer has been added to your list.",
+    });
+  };
+  const updateOffer = (updated: Offer) => {
+    setOffers(prev => prev.map(o => o.id === updated.id ? updated : o));
+  };
+  const deleteOffer = (id: string) => {
+    setOffers(prev => prev.filter(o => o.id !== id));
+    toast({
+      title: "Offer Deleted",
+      description: "Offer has been removed.",
+    });
+  };
+  const selectOffer = (id: string, selected: boolean) => {
+    setOffers(prev => prev.map(o => o.id === id ? { ...o, isSelected: selected } : o));
+  };
+  const selectAllOffers = (checked: boolean) => {
+    setOffers(prev => prev.map(o => ({ ...o, isSelected: checked })));
+  };
+  const exportOffers = () => {
+    const data = selectedOffers.length === 0 ? offers : selectedOffers;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'offers-export.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({
+      title: "Export Successful",
+      description: `${data.length} offers exported.`,
     });
   };
 
@@ -89,97 +116,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
     setOffers(prev => [...prev, copiedOffer]);
     toast({
       title: "Offer Copied",
-      description: `"${originalOffer.name}" has been copied successfully.`,
-    });
-  };
-
-  const deleteOffer = (offerId: string) => {
-    if (offers.length === 1) {
-      toast({
-        title: "Cannot Delete",
-        description: "You must have at least one offer.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setOffers(prev => prev.filter(offer => offer.id !== offerId));
-    toast({
-      title: "Offer Deleted",
-      description: "The offer has been removed from your list.",
-    });
-  };
-
-  const updateOffer = (updatedOffer: Offer) => {
-    setOffers(prev => prev.map(offer => 
-      offer.id === updatedOffer.id ? updatedOffer : offer
-    ));
-  };
-
-  const selectOffer = (offerId: string, selected: boolean) => {
-    setOffers(prev => prev.map(offer =>
-      offer.id === offerId ? { ...offer, isSelected: selected } : offer
-    ));
-  };
-
-  const selectAllOffers = (selected: boolean) => {
-    setOffers(prev => prev.map(offer => ({ ...offer, isSelected: selected })));
-  };
-
-  const bulkDelete = () => {
-    if (selectedOffers.length === offers.length) {
-      toast({
-        title: "Cannot Delete All",
-        description: "You must have at least one offer.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setOffers(prev => prev.filter(offer => !offer.isSelected));
-    toast({
-      title: "Offers Deleted",
-      description: `${selectedOffers.length} offer(s) have been deleted.`,
-    });
-  };
-
-  const bulkCopy = () => {
-    const newOffers = selectedOffers.map(offer => ({
-      ...offer,
-      id: `offer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: `${offer.name} (Copy)`,
-      isSelected: false
-    }));
-    setOffers(prev => [...prev, ...newOffers]);
-    toast({
-      title: "Offers Copied",
-      description: `${selectedOffers.length} offer(s) have been copied.`,
-    });
-  };
-
-  const saveAllOffers = () => {
-    // Here you would typically send the offers to your backend
-    console.log('Saving offers:', offers);
-    toast({
-      title: "Offers Saved",
-      description: `${offers.length} offer(s) have been saved successfully.`,
-    });
-    setShowSummary(true);
-  };
-
-  const exportOffers = () => {
-    const dataStr = JSON.stringify(offers, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = 'offers-export.json';
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    
-    toast({
-      title: "Export Complete",
-      description: "Offers have been exported successfully.",
+      description: "A copy of the offer has been added.",
     });
   };
 
@@ -278,7 +215,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
       {/* Controls */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -287,11 +224,10 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-64"
+                  disabled={disabled}
                 />
               </div>
-              
-
-              <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
+              <Select value={filterType} onValueChange={(value: any) => setFilterType(value)} disabled={disabled}>
                 <SelectTrigger className="w-32">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue />
@@ -304,9 +240,8 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                   <SelectItem value="PRODUCT">PRODUCT</SelectItem>
                 </SelectContent>
               </Select>
-
               {mode === 'export' && setStatusFilter && (
-                <Select value={statusFilter ?? undefined} onValueChange={value => setStatusFilter(value === 'all' ? null : value)}>
+                <Select value={statusFilter ?? undefined} onValueChange={value => setStatusFilter(value === 'all' ? null : value)} disabled={disabled}>
                   <SelectTrigger className="w-32">
                     <Badge className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="Status" />
@@ -321,19 +256,17 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                   </SelectContent>
                 </Select>
               )}
-
               <div className="flex items-center gap-2">
                 <Checkbox
                   checked={offers.length > 0 && selectedOffers.length === offers.length}
                   onCheckedChange={selectAllOffers}
+                  disabled={disabled}
                 />
                 <Label className="text-sm">
                   Select All ({selectedOffers.length}/{offers.length})
                 </Label>
               </div>
             </div>
-
-            {/* Removed Clone Selected and Delete Selected buttons for export page */}
           </div>
         </div>
       </div>
@@ -354,7 +287,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                       : 'Create your first offer to get started.'}
                   </p>
                   {!searchTerm && filterType === 'all' && (
-                    <Button onClick={addOffer}>
+                    <Button onClick={addOffer} disabled={disabled}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Your First Offer
                     </Button>
@@ -363,55 +296,51 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
               </CardContent>
             </Card>
           ) : (
-            filteredOffers.map((offer) => (
-              <OfferCard
-                key={offer.id}
-                offer={offer}
-                onOfferChange={updateOffer}
-                onCopy={copyOffer}
-                onDelete={deleteOffer}
-                onSelect={selectOffer}
-              />
-            ))
+            <>
+              {filteredOffers.map((offer) => (
+                <OfferCard
+                  key={offer.id}
+                  offer={offer}
+                  onOfferChange={updateOffer}
+                  onCopy={copyOffer}
+                  onDelete={deleteOffer}
+                  onSelect={selectOffer}
+                  disabled={disabled}
+                />
+              ))}
+            </>
           )}
         </div>
-
-
-{showSummary && offers.length > 0 && (
-  <Card className="mt-6 bg-muted/30">
-<CardHeader>
-  <div className="flex justify-between items-center w-full">
-    <span className="text-base font-medium text-muted-foreground">Summary</span>
-    <span className="text-sm text-muted-foreground">
-      Total Offers: <span className="text-xl font-bold">{offers.length}</span>
-    </span>
-  </div>
-</CardHeader>
-
-
-  
-    <CardContent>
-      <div className="grid grid-cols-3 gap-5 text-sm">
-        {['PROMO', 'BASE', 'VOUCHER'].map(type => {
-          const filtered = offers.filter(o => o.type === type);
-          const successCount = filtered.filter(o => o.update_status === 'success').length;
-          const failCount = filtered.filter(o => o.update_status === 'fail').length;
-          return (
-            <div key={type}>
-              <div className="font-medium text-muted-foreground justify-between items-center">{type}</div>
-              <div className="text-sm">
-                <div className="text-success font-bold">✔ Applied: {successCount}</div>
-                <div className="text-destructive font-bold">✖ Skipped: {failCount}</div>
+        {showSummary && offers.length > 0 && (
+          <Card className="mt-6 bg-muted/30">
+            <CardHeader>
+              <div className="flex justify-between items-center w-full">
+                <span className="text-base font-medium text-muted-foreground">Summary</span>
+                <span className="text-sm text-muted-foreground">
+                  Total Offers: <span className="text-xl font-bold">{offers.length}</span>
+                </span>
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </CardContent>
-  </Card>
-)}
-
-
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-5 text-sm">
+                {['PROMO', 'BASE', 'VOUCHER'].map(type => {
+                  const filtered = offers.filter(o => o.type === type);
+                  const successCount = filtered.filter(o => o.update_status === 'success').length;
+                  const failCount = filtered.filter(o => o.update_status === 'fail').length;
+                  return (
+                    <div key={type}>
+                      <div className="font-medium text-muted-foreground justify-between items-center">{type}</div>
+                      <div className="text-sm">
+                        <div className="text-success font-bold">✔ Applied: {successCount}</div>
+                        <div className="text-destructive font-bold">✖ Skipped: {failCount}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

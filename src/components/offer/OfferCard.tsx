@@ -14,6 +14,7 @@ import React from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Offer } from "./types";
+import { PricingFrame } from "./PricingFrame";
 import { RuleBuilder } from "./RuleBuilder";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,9 +24,10 @@ interface OfferCardProps {
   onCopy: (offer: Offer) => void;
   onDelete: (offerId: string) => void;
   onSelect: (offerId: string, selected: boolean) => void;
+  disabled?: boolean;
 }
 
-export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: OfferCardProps) {
+export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect, disabled = false }: OfferCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'rules' | 'pricing'>('basic');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'failed' | 'success'>('idle');
@@ -106,6 +108,40 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
     // You can replace with real save logic
   }
 
+  // Pricing frame logic
+  const pricingFrames = offer.priceConfiguration.endDateKnown
+    ? offer.pricingFrames || [offer.priceConfiguration]
+    : [offer.priceConfiguration];
+
+  // State for each frame
+  const [frameStates, setFrameStates] = useState(pricingFrames.map(() => ({ isSaved: false, isEditing: false })));
+
+  const setIsSaved = (idx: number, value: boolean) => {
+    setFrameStates(states => states.map((s, i) => i === idx ? { ...s, isSaved: value } : s));
+  };
+  const setIsEditing = (idx: number, value: boolean) => {
+    setFrameStates(states => states.map((s, i) => i === idx ? { ...s, isEditing: value } : s));
+  };
+
+  const handleAddFrame = () => {
+    if (!offer.priceConfiguration.endDateKnown) return;
+    const newFrame = { ...offer.priceConfiguration, durationValue: 1 };
+    const updatedFrames = [...(offer.pricingFrames || [offer.priceConfiguration]), newFrame];
+    onOfferChange({
+      ...offer,
+      pricingFrames: updatedFrames
+    });
+  };
+
+  const handleDeleteFrame = (idx: number) => {
+    if (pricingFrames.length <= 1) return;
+    const updatedFrames = pricingFrames.filter((_, i) => i !== idx);
+    onOfferChange({
+      ...offer,
+      pricingFrames: updatedFrames
+    });
+  };
+
   return (
     <Card className={cn(
       "transition-all duration-200",
@@ -118,6 +154,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
             <Checkbox
               checked={offer.isSelected}
               onCheckedChange={(checked) => onSelect(offer.id, !!checked)}
+              disabled={disabled}
             />
             <div className="flex items-center gap-2">
               {typeof window !== 'undefined' && window.location.pathname.includes('/bulk/create') ? (
@@ -188,6 +225,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
               size="sm"
               onClick={handleSave}
               className={saveStatus === 'failed' ? 'border-red-500 text-red-500' : ''}
+              disabled={disabled}
             >
               <Save className="mr-2 h-4 w-4" />
               {saveStatus === 'failed' ? 'Retry Save' : 'Save'}
@@ -197,6 +235,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
               size="sm"
               onClick={() => onDelete(offer.id)}
               className="gap-2 text-destructive hover:text-destructive"
+              disabled={disabled}
             >
               <Trash2 className="h-4 w-4" />
               Delete
@@ -206,6 +245,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
               className="gap-2"
+              disabled={disabled}
             >
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4" />
@@ -262,6 +302,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
                     value={offer.name}
                     onChange={(e) => updateOffer({ name: e.target.value })}
                     placeholder="Enter offer name"
+                    disabled={disabled}
                   />
                 </div>
                 <div className="space-y-2">
@@ -269,6 +310,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
                   <Select
                     value={offer.type}
                     onValueChange={(value: 'PROMO' | 'BASE' | 'PROMO' | 'BASE') => updateOffer({ type: value })}
+                    disabled={disabled}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -291,6 +333,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
                   onChange={(e) => updateOffer({ description: e.target.value })}
                   placeholder="Enter offer description"
                   rows={3}
+                  disabled={disabled}
                 />
               </div>
 
@@ -305,6 +348,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
                           "w-full justify-start text-left font-normal",
                           !offer.startDate && "text-muted-foreground"
                         )}
+                        disabled={disabled}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {offer.startDate ? format(offer.startDate, "PPP") : "Pick date"}
@@ -331,6 +375,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
                           "w-full justify-start text-left font-normal",
                           !offer.endDate && "text-muted-foreground"
                         )}
+                        disabled={disabled}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {offer.endDate ? format(offer.endDate, "PPP") : "Pick date"}
@@ -357,6 +402,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
                           "w-full justify-start text-left font-normal",
                           !offer.testingStartDate && "text-muted-foreground"
                         )}
+                        disabled={disabled}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {offer.testingStartDate ? format(offer.testingStartDate, "PPP") : "Pick date"}
@@ -382,6 +428,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
                     value={offer.productId}
                     onChange={(e) => updateOffer({ productId: e.target.value })}
                     placeholder="Enter product ID"
+                    disabled={disabled}
                   />
                 </div>
                 <div className="space-y-2">
@@ -391,6 +438,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
                     value={offer.eipProductId}
                     onChange={(e) => updateOffer({ eipProductId: e.target.value })}
                     placeholder="Enter EIP product ID"
+                    disabled={disabled}
                   />
                 </div>
               </div>
@@ -401,6 +449,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
             <RuleBuilder
               rules={offer.rules}
               onRulesChange={(rules) => updateOffer({ rules })}
+              disabled={disabled}
             />
           )}
 
@@ -408,148 +457,36 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect }: 
             <div className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`er-pricepoint-${offer.id}`}>ER Pricepoint</Label>
+                  <Label htmlFor={`er-pricepoint-${offer.id}`}>ER Pricepoint <span className="text-red-500">*</span></Label>
                   <Input
                     id={`er-pricepoint-${offer.id}`}
                     value={offer.priceConfiguration.erPricepoint}
                     onChange={(e) => updatePriceConfig({ erPricepoint: e.target.value })}
                     placeholder="Long Pricepoint ID"
+                    required
                   />
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <Label>Enddate known?</Label>
-                  <Switch
-                    checked={offer.priceConfiguration.endDateKnown}
-                    onCheckedChange={(checked) => updatePriceConfig({ endDateKnown: checked })}
+                {/* Pricing frames logic */}
+                {pricingFrames.map((frame, idx) => (
+                  <PricingFrame
+                    key={idx}
+                    offer={{ ...offer, priceConfiguration: frame }}
+                    updatePriceConfig={(updates) => {
+                      const updatedFrames = pricingFrames.map((f, i) =>
+                        i === idx ? { ...f, ...updates } : f
+                      );
+                      onOfferChange({ ...offer, pricingFrames: updatedFrames });
+                    }}
+                    onAddFrame={handleAddFrame}
+                    onDeleteFrame={pricingFrames.length > 1 ? () => handleDeleteFrame(idx) : undefined}
+                    frameCount={pricingFrames.length}
+                    isSaved={frameStates[idx]?.isSaved ?? false}
+                    setIsSaved={(v) => setIsSaved(idx, v)}
+                    isEditing={frameStates[idx]?.isEditing ?? false}
+                    setIsEditing={(v) => setIsEditing(idx, v)}
+                    disabled={disabled}
                   />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Duration</Label>
-                    <Select
-                      value={offer.priceConfiguration.duration}
-                      onValueChange={(value: any) => updatePriceConfig({ duration: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="month">Month</SelectItem>
-                        <SelectItem value="week">Week</SelectItem>
-                        <SelectItem value="day">Day</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`promo-type-${offer.id}`}>Promo Type</Label>
-                    <Input
-                      id={`promo-type-${offer.id}`}
-                      value={offer.priceConfiguration.promoType}
-                      onChange={(e) => updatePriceConfig({ promoType: e.target.value })}
-                      placeholder="Enter promo type"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`price-description-${offer.id}`}>Description</Label>
-                  <Input
-                    id={`price-description-${offer.id}`}
-                    value={offer.priceConfiguration.description}
-                    onChange={(e) => updatePriceConfig({ description: e.target.value })}
-                    placeholder="Promo Description"
-                  />
-                </div>
-
-                {/* Price Modifier Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Price Modifier</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Type</Label>
-                        <Select
-                          value={offer.priceConfiguration.priceModifier.type}
-                          onValueChange={(value: any) => updatePriceConfig({
-                            priceModifier: { ...offer.priceConfiguration.priceModifier, type: value }
-                          })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="percentage">Percentage Discount</SelectItem>
-                            <SelectItem value="fixed">Fixed Amount</SelectItem>
-                            <SelectItem value="points">Points</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Value</Label>
-                        <Input
-                          type="number"
-                          value={offer.priceConfiguration.priceModifier.value}
-                          onChange={(e) => updatePriceConfig({
-                            priceModifier: { 
-                              ...offer.priceConfiguration.priceModifier, 
-                              value: parseFloat(e.target.value) || 0 
-                            }
-                          })}
-                          placeholder="50"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label>Start</Label>
-                        <Input
-                          type="number"
-                          value={offer.priceConfiguration.priceModifier.start}
-                          onChange={(e) => updatePriceConfig({
-                            priceModifier: { 
-                              ...offer.priceConfiguration.priceModifier, 
-                              start: parseFloat(e.target.value) || 0 
-                            }
-                          })}
-                          placeholder="0"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>End</Label>
-                        <Input
-                          type="number"
-                          value={offer.priceConfiguration.priceModifier.end}
-                          onChange={(e) => updatePriceConfig({
-                            priceModifier: { 
-                              ...offer.priceConfiguration.priceModifier, 
-                              end: parseFloat(e.target.value) || 0 
-                            }
-                          })}
-                          placeholder="3"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Amount</Label>
-                        <Input
-                          type="number"
-                          value={offer.priceConfiguration.priceModifier.amount}
-                          onChange={(e) => updatePriceConfig({
-                            priceModifier: { 
-                              ...offer.priceConfiguration.priceModifier, 
-                              amount: parseFloat(e.target.value) || 0 
-                            }
-                          })}
-                          placeholder="5"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                ))}
               </div>
             </div>
           )}
