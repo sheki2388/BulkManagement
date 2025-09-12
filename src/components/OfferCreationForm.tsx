@@ -199,6 +199,8 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
   const [showSummary, setShowSummary] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'PROMO' | 'BASE' | 'VOUCHER' | 'PRODUCT'>('all');
+  const [country, setCountry] = useState<string>('');
+  const isCountrySelected = !!country;
   const { toast } = useToast();
   const selectedOffers = offers.filter(offer => offer.isSelected);
   const filteredOffers = offers.filter(offer => {
@@ -286,7 +288,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
             </div>
             <div className="flex items-center gap-2">
               {mode === 'create' && (
-                <Button onClick={addOffer} className="bg-primary hover:bg-primary-hover">
+                <Button onClick={addOffer} className="bg-primary hover:bg-primary-hover" disabled={disabled || !isCountrySelected}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Offer
                 </Button>
@@ -359,6 +361,21 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
         <div className="container mx-auto px-6 py-4">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
+              {/* Country Selector */}
+              <Select value={country} onValueChange={setCountry} disabled={disabled}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Select Country" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UK">United Kingdom</SelectItem>
+                  <SelectItem value="DE">Germany</SelectItem>
+                  <SelectItem value="FR">France</SelectItem>
+                  <SelectItem value="IT">Italy</SelectItem>
+                  <SelectItem value="ES">Spain</SelectItem>
+                  <SelectItem value="IN">India</SelectItem>
+                </SelectContent>
+              </Select>
+              {/* Search Offers */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -366,10 +383,10 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-64"
-                  disabled={disabled}
+                  disabled={disabled || !isCountrySelected}
                 />
               </div>
-              <Select value={filterType} onValueChange={(value: any) => setFilterType(value)} disabled={disabled}>
+              <Select value={filterType} onValueChange={(value: any) => setFilterType(value)} disabled={disabled || !isCountrySelected}>
                 <SelectTrigger className="w-32">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue />
@@ -383,7 +400,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                 </SelectContent>
               </Select>
               {mode === 'export' && setStatusFilter && (
-                <Select value={statusFilter ?? undefined} onValueChange={value => setStatusFilter(value === 'all' ? null : value)} disabled={disabled}>
+                <Select value={statusFilter ?? undefined} onValueChange={value => setStatusFilter(value === 'all' ? null : value)} disabled={disabled || !isCountrySelected}>
                   <SelectTrigger className="w-32">
                     <Badge className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="Status" />
@@ -402,7 +419,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                 <Checkbox
                   checked={offers.length > 0 && selectedOffers.length === offers.length}
                   onCheckedChange={selectAllOffers}
-                  disabled={disabled}
+                  disabled={disabled || !isCountrySelected}
                 />
                 <Label className="text-sm">
                   Select All ({selectedOffers.length}/{offers.length})
@@ -416,24 +433,26 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
       {/* Offer Cards */}
       <div className="container mx-auto px-6 py-6">
         <div className="space-y-4">
-          {filteredOffers.length === 0 ? (
+          {(!isCountrySelected || filteredOffers.length === 0) ? (
             <Card>
               <CardContent className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No offers found
+                    {!isCountrySelected ? 'Please select a country to continue' : 'No offers found'}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    {searchTerm || filterType !== 'all' 
-                      ? 'Try adjusting your search or filter criteria.'
-                      : 'Create your first offer to get started.'}
+                    {!isCountrySelected
+                      ? 'All actions are disabled until a country is selected.'
+                      : (searchTerm || filterType !== 'all' 
+                        ? 'Try adjusting your search or filter criteria.'
+                        : 'Create your first offer to get started.')}
                   </p>
-                  {!searchTerm && filterType === 'all' && (
-                    <Button onClick={addOffer} disabled={disabled}>
+                  {!isCountrySelected ? null : (!searchTerm && filterType === 'all' && (
+                    <Button onClick={addOffer} disabled={disabled || !isCountrySelected}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Your First Offer
                     </Button>
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -447,7 +466,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                   onCopy={copyOffer}
                   onDelete={deleteOffer}
                   onSelect={selectOffer}
-                  disabled={disabled}
+                  disabled={disabled || !isCountrySelected}
                 />
               ))}
             </>
