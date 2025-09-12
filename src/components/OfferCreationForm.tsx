@@ -12,31 +12,173 @@ import { useToast } from "@/hooks/use-toast";
 import { Offer } from "./offer/types";
 import { OfferCard } from "./offer/OfferCard";
 
-const createEmptyOffer = (): Offer => ({
-  id: `offer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-  name: '',
-  description: '',
-  type: 'PROMO',
-  productId: '',
-  eipProductId: '',
-  rules: [],
-  priceConfiguration: {
-    erPricepoint: '',
-    endDateKnown: true,
-    duration: 'month',
-    promoType: '',
-    description: '',
-    priceModifier: {
-      type: 'percentage',
-      value: 0,
-      start: 0,
-      end: 0,
-      amount: 0
-    }
+const sampleOffers: Offer[] = [
+  {
+    id: `offer-1`,
+    name: 'Super Promo Offer',
+    description: 'Get 20% off on all products for a limited time.',
+    type: 'PROMO',
+    productId: 'PROD-12345',
+    eipProductId: 'EIP-67890',
+    status: 'Active',
+    startDate: new Date('2025-09-01'),
+    endDate: new Date('2025-09-30'),
+    testingStartDate: new Date('2025-08-25'),
+    rules: [
+      {
+        id: 'rule-1',
+        type: 'device_type',
+        config: { deviceTypes: { MO: true, SW: false, TA: true } }
+      },
+      {
+        id: 'rule-2',
+        type: 'price_range',
+        config: { priceMin: 100, priceMax: 500 }
+      },
+      {
+        id: 'rule-3',
+        type: 'loyalty_points',
+        config: { minPoints: 50, maxPoints: 200 }
+      }
+    ],
+    priceConfiguration: {
+      erPricepoint: 'ER-2025',
+      endDateKnown: true,
+      duration: 'month',
+      durationValue: 1,
+      promoType: 'Seasonal',
+      description: 'September promo pricing',
+      priceModifier: {
+        type: 'percentage',
+        value: 20,
+        start: 100,
+        end: 500,
+        amount: 80
+      }
+    },
+    pricingFrames: [
+      {
+        erPricepoint: 'ER-2025-A',
+        endDateKnown: false,
+        duration: 'week',
+        durationValue: 2,
+        promoType: 'Flash',
+        description: 'Flash sale pricing',
+        priceModifier: {
+          type: 'fixed',
+          value: 50,
+          start: 0,
+          end: 100,
+          amount: 50
+        }
+      }
+    ],
+    isSelected: false,
+    update_status: "success"
   },
-  isSelected: false,
-  update_status: ""
-});
+  {
+    id: `offer-2`,
+    name: 'Base Product Offer',
+    description: 'Base offer for new product launch.',
+    type: 'BASE',
+    productId: 'PROD-54321',
+    eipProductId: 'EIP-09876',
+    status: 'Draft',
+    startDate: new Date('2025-10-01'),
+    endDate: new Date('2025-10-31'),
+    testingStartDate: new Date('2025-09-25'),
+    rules: [
+      {
+        id: 'rule-4',
+        type: 'manufacture_name',
+        config: { manufactureNames: ['BrandX', 'BrandY'] }
+      },
+      {
+        id: 'rule-5',
+        type: 'flow',
+        config: { flowTypes: { OTT: true, STANDALONE: false, API: true, MVA: false } }
+      }
+    ],
+    priceConfiguration: {
+      erPricepoint: 'ER-BASE',
+      endDateKnown: true,
+      duration: 'year',
+      durationValue: 1,
+      promoType: 'Launch',
+      description: 'Base product pricing',
+      priceModifier: {
+        type: 'fixed',
+        value: 100,
+        start: 0,
+        end: 1000,
+        amount: 100
+      }
+    },
+    pricingFrames: [
+      {
+        erPricepoint: 'ER-BASE-A',
+        endDateKnown: true,
+        duration: 'month',
+        durationValue: 6,
+        promoType: 'Intro',
+        description: 'Introductory pricing',
+        priceModifier: {
+          type: 'points',
+          value: 500,
+          start: 0,
+          end: 500,
+          amount: 500
+        }
+      }
+    ],
+    isSelected: false,
+    update_status: "draft"
+  },
+  {
+    id: `offer-3`,
+    name: 'Voucher Special',
+    description: 'Voucher offer for loyal customers.',
+    type: 'VOUCHER',
+    productId: 'PROD-22222',
+    eipProductId: 'EIP-33333',
+    status: 'Live',
+    startDate: new Date('2025-11-01'),
+    endDate: new Date('2025-11-15'),
+    testingStartDate: new Date('2025-10-20'),
+    rules: [
+      {
+        id: 'rule-6',
+        type: 'store_id',
+        config: { storeIds: 'STORE-001' }
+      }
+    ],
+    priceConfiguration: {
+      erPricepoint: 'ER-VOUCHER',
+      endDateKnown: false,
+      duration: 'day',
+      durationValue: 7,
+      promoType: 'Loyalty',
+      description: 'Voucher pricing',
+      priceModifier: {
+        type: 'points',
+        value: 200,
+        start: 0,
+        end: 200,
+        amount: 200
+      }
+    },
+    pricingFrames: [],
+    isSelected: false,
+    update_status: "live"
+  }
+];
+
+const createEmptyOffer = (): Offer => {
+  // Return a random sample offer for demonstration
+  const idx = Math.floor(Math.random() * sampleOffers.length);
+  // Deep clone to avoid state mutation
+  return JSON.parse(JSON.stringify(sampleOffers[idx]));
+};
 
 export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatusFilter, disabled = false }: { initialOffers?: Offer[], mode?: 'create' | 'export' | 'import', statusFilter?: string | null, setStatusFilter?: (value: string | null) => void, disabled?: boolean }) {
   // State and handlers
