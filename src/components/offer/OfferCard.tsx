@@ -233,6 +233,16 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect, di
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => onCopy(offer)}
+              className="gap-2"
+              disabled={disabled}
+            >
+              <Copy className="h-4 w-4" />
+              Clone
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => onDelete(offer.id)}
               className="gap-2 text-destructive hover:text-destructive"
               disabled={disabled}

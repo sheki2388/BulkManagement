@@ -287,11 +287,33 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {/* Create button logic for create page */}
               {mode === 'create' && (
-                <Button onClick={addOffer} className="bg-primary hover:bg-primary-hover" disabled={disabled || !isCountrySelected}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Offer
-                </Button>
+                <>
+                  <Button
+                    className="bg-success hover:bg-success/80"
+                    disabled={disabled || !isCountrySelected || selectedOffers.length === 0}
+                    onClick={() => {
+                      // Implement create logic here (e.g., send selected offers to backend)
+                      toast({
+                        title: selectedOffers.length === offers.length ? "All Offers Created" : "Selected Offers Created",
+                        description: selectedOffers.length === offers.length
+                          ? `${offers.length} offers created.`
+                          : `${selectedOffers.length} selected offer(s) created.`
+                      });
+                    }}
+                  >
+                    {selectedOffers.length === 0
+                      ? 'Create'
+                      : selectedOffers.length === offers.length
+                        ? 'Create All'
+                        : 'Create Selected'}
+                  </Button>
+                  <Button onClick={addOffer} className="bg-primary hover:bg-primary-hover" disabled={disabled || !isCountrySelected}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Offer
+                  </Button>
+                </>
               )}
               {(mode === 'export' || mode === 'import') && (
                 <>
@@ -415,7 +437,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                   </SelectContent>
                 </Select>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full">
                 <Checkbox
                   checked={offers.length > 0 && selectedOffers.length === offers.length}
                   onCheckedChange={selectAllOffers}
@@ -424,6 +446,45 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                 <Label className="text-sm">
                   Select All ({selectedOffers.length}/{offers.length})
                 </Label>
+                <div className="flex-1" />
+                {/* Clone and Delete Selected buttons (only on create page, if any selected) */}
+                {mode === 'create' && selectedOffers.length > 0 && (
+                  <div className="flex items-center gap-2 justify-end">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        // Clone all selected offers
+                        const clones = selectedOffers.map(offer => ({
+                          ...offer,
+                          id: `offer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                          name: `${offer.name} (Clone)`,
+                          isSelected: false
+                        }));
+                        setOffers(prev => [...prev, ...clones]);
+                        toast({
+                          title: "Offers Cloned",
+                          description: `${clones.length} offer(s) cloned.`,
+                        });
+                      }}
+                      disabled={disabled || !isCountrySelected}
+                    >
+                      Clone Selected
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        setOffers(prev => prev.filter(o => !o.isSelected));
+                        toast({
+                          title: "Offers Deleted",
+                          description: `${selectedOffers.length} offer(s) deleted.`,
+                        });
+                      }}
+                      disabled={disabled || !isCountrySelected}
+                    >
+                      Delete Selected
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
