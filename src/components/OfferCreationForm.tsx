@@ -294,7 +294,8 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                     className="bg-success hover:bg-success/80"
                     disabled={disabled || !isCountrySelected || selectedOffers.length === 0}
                     onClick={() => {
-                      // Implement create logic here (e.g., send selected offers to backend)
+                      // Simulate create logic and show summary
+                      setShowSummary(true);
                       toast({
                         title: selectedOffers.length === offers.length ? "All Offers Created" : "Selected Offers Created",
                         description: selectedOffers.length === offers.length
@@ -534,34 +535,26 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
           )}
         </div>
         {showSummary && offers.length > 0 && (
-          <Card className="mt-6 bg-muted/30">
-            <CardHeader>
-              <div className="flex justify-between items-center w-full">
-                <span className="text-base font-medium text-muted-foreground">Summary</span>
-                <span className="text-sm text-muted-foreground">
-                  Total Offers: <span className="text-xl font-bold">{offers.length}</span>
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-5 text-sm">
-                {['PROMO', 'BASE', 'VOUCHER'].map(type => {
-                  const filtered = offers.filter(o => o.type === type);
-                  const successCount = filtered.filter(o => o.update_status === 'success').length;
-                  const failCount = filtered.filter(o => o.update_status === 'fail').length;
-                  return (
-                    <div key={type}>
-                      <div className="font-medium text-muted-foreground justify-between items-center">{type}</div>
-                      <div className="text-sm">
-                        <div className="text-success font-bold">✔ Applied: {successCount}</div>
-                        <div className="text-destructive font-bold">✖ Skipped: {failCount}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="container mx-auto px-0 mt-2">
+            <Card className="w-full rounded bg-card shadow-lg flex flex-col justify-center">
+              <CardContent className="py-0 flex items-center justify-center h-full min-h-[40px]">
+                <div className="flex flex-wrap gap-2 items-center justify-between w-full">
+                  {['PROMO', 'BASE', 'VOUCHER', 'PRODUCT'].map(type => {
+                    const filtered = offers.filter(o => o.type === type);
+                    const successCount = filtered.filter(o => o.update_status === 'success').length;
+                    const failCount = filtered.filter(o => o.update_status === 'fail').length;
+                    return (
+                      <span key={type} className="flex gap-1 items-center">
+                        <span className="font-semibold text-muted-foreground">{type}:</span>
+                        <span className="text-success">{successCount}✔</span>
+                        <span className="text-destructive">{failCount}✖</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>
