@@ -220,36 +220,40 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect, di
           </div>
           
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSave}
-              className={saveStatus === 'failed' ? 'border-red-500 text-red-500' : ''}
-              disabled={disabled}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              {saveStatus === 'failed' ? 'Retry Save' : 'Save'}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onCopy(offer)}
-              className="gap-2"
-              disabled={disabled}
-            >
-              <Copy className="h-4 w-4" />
-              Clone
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(offer.id)}
-              className="gap-2 text-destructive hover:text-destructive"
-              disabled={disabled}
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </Button>
+            {!(typeof window !== 'undefined' && window.location.pathname.includes('/bulk/export')) && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSave}
+                  className={saveStatus === 'failed' ? 'border-red-500 text-red-500' : ''}
+                  disabled={disabled}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {saveStatus === 'failed' ? 'Retry Save' : 'Save'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onCopy(offer)}
+                  className="gap-2"
+                  disabled={disabled}
+                >
+                  <Copy className="h-4 w-4" />
+                  Clone
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(offer.id)}
+                  className="gap-2 text-destructive hover:text-destructive"
+                  disabled={disabled}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              </>
+            )}
             <Button
               variant="ghost"
               size="sm"
