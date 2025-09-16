@@ -273,7 +273,7 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect, di
         
         {!isExpanded && (
           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
-            <span>Product ID: {offer.productId}</span>
+            <span>Offer ID: {offer.productId}</span>
             <span>Rules: {offer.rules.length}</span>
             {offer.startDate && (
               <span>Starts: {format(offer.startDate, "MMM dd, yyyy")}</span>
@@ -436,12 +436,12 @@ export function OfferCard({ offer, onOfferChange, onCopy, onDelete, onSelect, di
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`product-id-${offer.id}`}>Product ID</Label>
+                  <Label htmlFor={`product-id-${offer.id}`}>Offer ID</Label>
                   <Input
                     id={`product-id-${offer.id}`}
                     value={offer.productId}
                     onChange={(e) => updateOffer({ productId: e.target.value })}
-                    placeholder="Enter product ID"
+                    placeholder="Enter offer ID"
                     disabled={disabled}
                   />
                 </div>
