@@ -360,7 +360,11 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                         className="bg-primary hover:bg-primary-hover"
                         onClick={() => document.getElementById('import-offer-file')?.click()}
                       >
-                        Import Offer
+                        {selectedOffers.length === offers.length && offers.length > 0
+                          ? 'Import All'
+                          : selectedOffers.length > 0
+                            ? 'Import Selected'
+                            : 'Import'}
                       </Button>
                     </>
                   ) : (
