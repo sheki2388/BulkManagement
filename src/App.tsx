@@ -3,10 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import ExportIndex from "./pages/ExportIndex";
-import ImportIndex from "./pages/ImportIndex";
+import BulkManageTabs from "./components/BulkManageTabs";
+import NestedTabsDemo from "./components/NestedTabsDemo";
 import NotFound from "./pages/NotFound";
+import SidebarTabsDemo from "./components/SidebarTabsDemo";
 
 const queryClient = new QueryClient();
 
@@ -15,12 +15,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+  <BrowserRouter basename="/bulk">
         <Routes>
-            <Route path="/bulk/create/" element={<Index />} />
-            <Route path="/bulk/export/" element={<ExportIndex />} />
-            <Route path="/bulk/import/" element={<ImportIndex />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/" element={<BulkManageTabs />} />
+          <Route path="/nested-tabs" element={<NestedTabsDemo />} />
+          <Route path="/sidebar-tabs" element={<SidebarTabsDemo />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

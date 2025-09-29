@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -191,6 +192,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
     return initialOffers && initialOffers.length > 0 ? initialOffers : [createEmptyOffer()];
   };
   const [offers, setOffers] = useState<Offer[]>(loadOffers());
+  const [validating, setValidating] = useState(false);
   useEffect(() => {
     if (isCreate) {
       sessionStorage.setItem('offers', JSON.stringify(offers));
@@ -328,44 +330,78 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                         onChange={e => {
                           const file = e.target.files?.[0];
                           if (!file) return;
+                          setValidating(true);
                           const reader = new FileReader();
                           reader.onload = (event) => {
-                            try {
-                              const json = JSON.parse(event.target?.result as string);
-                              if (Array.isArray(json)) {
-                                setOffers(json);
-                                toast({
-                                  title: "Import Successful",
-                                  description: `${json.length} offers loaded from file.`
-                                });
-                              } else {
+                            setTimeout(() => { // Simulate async validation
+                              try {
+                                const json = JSON.parse(event.target?.result as string);
+                                if (Array.isArray(json)) {
+                                  setOffers(json);
+                                  toast({
+                                    title: "Import Successful",
+                                    description: `${json.length} offers loaded from file.`
+                                  });
+                                } else {
+                                  toast({
+                                    title: "Import Failed",
+                                    description: "File does not contain a valid array of offers.",
+                                    variant: "destructive"
+                                  });
+                                }
+                              } catch {
                                 toast({
                                   title: "Import Failed",
-                                  description: "File does not contain a valid array of offers.",
+                                  description: "Could not parse JSON file.",
                                   variant: "destructive"
                                 });
                               }
-                            } catch {
-                              toast({
-                                title: "Import Failed",
-                                description: "Could not parse JSON file.",
-                                variant: "destructive"
-                              });
-                            }
+                              setValidating(false);
+                            }, 1000);
                           };
                           reader.readAsText(file);
                         }}
                       />
                       <Button
+                        className="bg-success hover:bg-success/80 mr-2"
+                        disabled={disabled || !isCountrySelected || offers.length === 0}
+                        onClick={() => {
+                          // Implement save logic here (e.g., save selected offers)
+                          toast({
+                            title:
+                              selectedOffers.length === 0
+                                ? 'Saved'
+                                : selectedOffers.length === offers.length
+                                  ? 'All Offers Saved'
+                                  : 'Selected Offers Saved',
+                            description:
+                              selectedOffers.length === 0
+                                ? `${offers.length} offers saved.`
+                                : selectedOffers.length === offers.length
+                                  ? `${offers.length} offers saved.`
+                                  : `${selectedOffers.length} selected offer(s) saved.`
+                          });
+                        }}
+                      >
+                        {selectedOffers.length === 0
+                          ? 'Save'
+                          : selectedOffers.length === offers.length
+                            ? 'Save All'
+                            : 'Save Selected'}
+                      </Button>
+                      <Button
                         className="bg-primary hover:bg-primary-hover"
                         onClick={() => document.getElementById('import-offer-file')?.click()}
                       >
-                        {selectedOffers.length === offers.length && offers.length > 0
-                          ? 'Import All'
-                          : selectedOffers.length > 0
-                            ? 'Import Selected'
-                            : 'Import'}
+                        Import Offer
                       </Button>
+      {/* Modal for validating import */}
+      <Dialog open={validating}>
+        <DialogContent className="flex flex-col items-center justify-center">
+          <span className="text-lg font-semibold mb-2">Validating imported data...</span>
+          <span className="text-muted-foreground text-sm">Please wait</span>
+        </DialogContent>
+      </Dialog>
                     </>
                   ) : (
                     <Button onClick={exportOffers} className="bg-primary hover:bg-primary-hover">
@@ -420,6 +456,7 @@ export function OfferCreationForm({ initialOffers, mode, statusFilter, setStatus
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
+        export default OfferCreationForm;
                   <SelectItem value="PROMO">PROMO</SelectItem>
                   <SelectItem value="BASE">BASE</SelectItem>
                   <SelectItem value="VOUCHER">VOUCHER</SelectItem>
